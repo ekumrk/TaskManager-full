@@ -4,25 +4,36 @@ import manager.FileBackedTaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import tasks.Task;
 
 import java.nio.file.Files;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
+    @TempDir
+    Path tempDir;
+    Path historyPath;
+    String historyFile = "historyFileTest.csv";
+
     @BeforeEach
-    void init() {
-        super.init();
+    void init() throws IOException {
         try {
-            manager = new FileBackedTaskManager("/dev/java-sprint7-hw/resources/test.csv");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            historyPath = tempDir.resolve(historyFile);
+        } catch(InvalidPathException ipe) {
+            System.err.println(
+                    "error creating temporary test file in " +
+                            this.getClass().getSimpleName());
         }
+        manager = new FileBackedTaskManager(historyFile);
+        super.init();
     }
 
     @AfterEach

@@ -35,7 +35,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
 
 
-    void init() {
+    void init() throws IOException {
         task = new Task("taskTitle", "taskContent",
                 ZonedDateTime.of(LocalDateTime.parse("12:15 01.01.2023", DATE_TIME_FORMATTER), zone), 30);
         task2 = new Task("task2Title", "task2Content",
