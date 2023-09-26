@@ -1,6 +1,6 @@
 package Tests;
 
-import manager.FileBackedTaskManager;
+import managers.FileBackedTaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +39,11 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     @AfterEach
     void afterEach() throws IOException {
         Files.delete(manager.getHistoryFile());
+        manager.allTasks.clear();
+        manager.clearPriotitySet();
+        manager.tasks.clear();
+        manager.subtasks.clear();
+        manager.epics.clear();
     }
 
     @Test

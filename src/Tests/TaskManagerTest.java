@@ -1,8 +1,8 @@
 package Tests;
 
-import manager.HistoryManager;
-import manager.Managers;
-import manager.TaskManager;
+import managers.HistoryManager;
+import managers.Managers;
+import managers.TaskManager;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Status;
@@ -57,8 +57,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void checkIfUpdateTaskStatusCorrect() throws IOException {
         manager.createNewTask(task);
-        manager.updateTask(task.getId(), Status.IN_PROGRESS);
-        Status result = manager.tasks.get(task.getId()).getStatus();
+        Task renewTask = new Task(1,"taskTitle", "taskContent",
+                ZonedDateTime.of(LocalDateTime.parse("12:15 01.01.2023", DATE_TIME_FORMATTER), zone), 30, Status.IN_PROGRESS);
+        manager.updateTask(renewTask);
+        Status result = manager.tasks.get(renewTask.getId()).getStatus();
         assertEquals(Status.IN_PROGRESS, result);
     }
 

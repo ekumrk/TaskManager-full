@@ -1,4 +1,4 @@
-package manager;
+package managers;
 import ProgrammExceptions.CrossTimeException;
 import tasks.*;
 
@@ -13,22 +13,6 @@ public class InMemoryTaskManager implements TaskManager {
     private int nextId = 1;
 
     protected HistoryManager historyManager = Managers.getDefaultHistory();
-
-    protected Set<Task> prioritySet = new TreeSet<>((task1, task2) -> {
-        if (task1.startTime == null) {
-            return -1;
-        }
-        if (task1.startTime.isAfter(task2.startTime)) {
-            return 1;
-        }
-        if (task1.startTime.isBefore(task2.startTime)) {
-            return -1;
-        }
-        if (task1.startTime.equals(task2.startTime)) {
-            return 0;
-        }
-        return 0;
-    });
 
     public InMemoryTaskManager() {
     }
@@ -54,10 +38,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(int id, Status status) {
-        Task task = tasks.get(id);
-        prioritySet.remove(task);
-        task.setStatus(status);
+    public void updateTask(Task task) {
+        int id = task.getId();
+        Task taskForDelete = tasks.get(id);
+        prioritySet.remove(taskForDelete);
+
         tasks.put(id, task);
         prioritySet.add(task);
     }
@@ -261,23 +246,20 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtask(int subtId, Status updated) {
-        Subtask subtask = subtasks.get(subtId);
-        prioritySet.remove(subtask);
-        subtask.setStatus(updated);
+    public void updateSubtask(Subtask subtask) {
+        int id = subtask.getId();
+        Subtask subtaskForDelete = subtasks.get(id);
+        prioritySet.remove(subtaskForDelete);
+
+        subtasks.put(id, subtask);
         prioritySet.add(subtask);
-        subtasks.put(subtask.getId(), subtask);
 
         int epId = subtask.getEpicId();
         Epic epic = epics.get(epId);
         updateEpicStatus(epic);
     }
 
-    public Set<Task> getPrioritySet() {
-        return prioritySet;
-    }
-
-
+    @Override
     public void ifCrosses(Task task) throws CrossTimeException {
         for (Task t : prioritySet) {
             if (task.startTime.isBefore(t.getEndTime())) {
@@ -286,6 +268,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
     public void clearPriotitySet() {
         prioritySet.clear();
     }

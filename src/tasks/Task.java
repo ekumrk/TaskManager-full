@@ -9,8 +9,7 @@ public class Task {
     protected int id;
     protected String title;
     protected String content;
-    protected Status status = Status.NEW;
-
+    protected Status status;
     protected int duration;
     public ZonedDateTime startTime;
 
@@ -19,6 +18,16 @@ public class Task {
         this.content = content;
         this.startTime = startTime;
         this.duration = duration;
+        this.status = Status.NEW;
+    }
+
+    public Task (int id, String title, String content, ZonedDateTime startTime, int duration, Status status) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.startTime = startTime;
+        this.duration = duration;
+        setStatus(status);
     }
 
     protected Task() {
@@ -39,7 +48,6 @@ public class Task {
     }
 
     public void setStatus(Status status) {
-
         this.status = status;
     }
 
@@ -54,6 +62,7 @@ public class Task {
     public ZonedDateTime getStartTime() {
         return startTime;
     }
+
 
     @Override
     public String toString() {

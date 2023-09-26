@@ -1,4 +1,4 @@
-package manager;
+package managers;
 
 import ProgrammExceptions.CrossTimeException;
 import ProgrammExceptions.ManagerSaveException;
@@ -25,6 +25,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public List<Task> allTasks = new ArrayList<>();
 
+    public FileBackedTaskManager() {
+        historyFile = null;
+    }
 
     public FileBackedTaskManager(String direction) throws IOException {
         historyFile = Paths.get(HOME, direction);

@@ -1,15 +1,12 @@
-package manager;
+package managers;
 
+import ProgrammExceptions.CrossTimeException;
 import tasks.Epic;
-import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface TaskManager {
 
@@ -18,9 +15,25 @@ public interface TaskManager {
     Map<Integer, Subtask> subtasks = new HashMap<>();
     Map<Integer, Epic> epics = new HashMap<>();
 
+    Set<Task> prioritySet = new TreeSet<>((task1, task2) -> {
+        if (task1.startTime == null) {
+            return -1;
+        }
+        if (task1.startTime.isAfter(task2.startTime)) {
+            return 1;
+        }
+        if (task1.startTime.isBefore(task2.startTime)) {
+            return -1;
+        }
+        if (task1.startTime.equals(task2.startTime)) {
+            return 0;
+        }
+        return 0;
+    });
+
     public void createNewTask(Task task) throws IOException;
 
-    public void updateTask(int id, Status status);
+    public void updateTask(Task task);
 
     public List<Task> getTaskList();
 
@@ -44,7 +57,6 @@ public interface TaskManager {
 
     public void createNewSubtask(Subtask subtask) throws IOException;
 
-
     public ArrayList<Subtask> getSubtaskList();
 
     public void deleteAllSubtasks();
@@ -54,7 +66,14 @@ public interface TaskManager {
     public Subtask getSubtaskFromId(int id) throws IOException;
     public void deleteSubtaskFromId(int id);
 
-    public void updateSubtask (int subtId, Status updated);
+    public void updateSubtask(Subtask subtask);
 
     public List<Task> getHistory();
+
+    public static Set<Task> getPrioritySet() {
+        return prioritySet;
+    }
+
+    public void ifCrosses(Task task) throws CrossTimeException;
+    public void clearPriotitySet();
 }

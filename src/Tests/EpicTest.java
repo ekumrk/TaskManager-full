@@ -1,7 +1,8 @@
 package Tests;
 
-import manager.Managers;
-import manager.TaskManager;
+import managers.InMemoryTaskManager;
+import managers.TaskManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
@@ -26,9 +27,17 @@ class EpicTest {
 
     @BeforeEach
     public void BeforeEach() throws IOException {
-        manager = Managers.getDefault();
+        manager = new InMemoryTaskManager();
         epic = new Epic("title", "content");
         manager.createNewEpic(epic);
+    }
+
+    @AfterEach
+    public void AfterEach() {
+        manager.tasks.clear();
+        manager.subtasks.clear();
+        manager.epics.clear();
+        manager.clearPriotitySet();
     }
 
     @Test
@@ -57,8 +66,15 @@ class EpicTest {
         Subtask subtask2 = new Subtask("subtask2Title","subtask2Content", epic.getId(),
                 ZonedDateTime.of(LocalDateTime.parse("13:00 03.01.2023", DATE_TIME_FORMATTER), zone), 30);
         manager.createNewSubtask(subtask2);
-        manager.updateSubtask(subtask1.getId(), Status.DONE);
-        manager.updateSubtask(subtask2.getId(), Status.DONE);
+
+        Subtask subtask1ForUpdate = new Subtask(2, "subtask1Title", "subtask1Content", epic.getId(),
+                ZonedDateTime.of(LocalDateTime.parse("12:15 03.01.2023", DATE_TIME_FORMATTER), zone), 30, Status.DONE);
+        Subtask subtask2ForUpdate = new Subtask(3, "subtask2Title","subtask2Content", epic.getId(),
+                ZonedDateTime.of(LocalDateTime.parse("13:00 03.01.2023", DATE_TIME_FORMATTER), zone), 30, Status.DONE);
+
+        manager.updateSubtask(subtask1ForUpdate);
+        manager.updateSubtask(subtask2ForUpdate);
+
         Status result = epic.getStatus();
         assertEquals(Status.DONE, result);
     }
@@ -70,8 +86,11 @@ class EpicTest {
         manager.createNewSubtask(subtask1);
         Subtask subtask2 = new Subtask("subtask2Title","subtask2Content", epic.getId(),
                 ZonedDateTime.of(LocalDateTime.parse("13:00 03.01.2023", DATE_TIME_FORMATTER), zone), 30);
+
         manager.createNewSubtask(subtask2);
-        manager.updateSubtask(subtask1.getId(), Status.DONE);
+        Subtask subtask1ForUpdate = new Subtask(2, "subtask1Title", "subtask1Content", epic.getId(),
+                ZonedDateTime.of(LocalDateTime.parse("12:15 03.01.2023", DATE_TIME_FORMATTER), zone), 30, Status.DONE);
+        manager.updateSubtask(subtask1ForUpdate);
         Status result = epic.getStatus();
         assertEquals(Status.IN_PROGRESS, result);
     }
@@ -84,8 +103,14 @@ class EpicTest {
         Subtask subtask2 = new Subtask("subtask2Title","subtask2Content", epic.getId(),
                 ZonedDateTime.of(LocalDateTime.parse("13:00 03.01.2023", DATE_TIME_FORMATTER), zone), 30);
         manager.createNewSubtask(subtask2);
-        manager.updateSubtask(subtask1.getId(), Status.IN_PROGRESS);
-        manager.updateSubtask(subtask2.getId(), Status.IN_PROGRESS);
+
+        Subtask subtask1ForUpdate = new Subtask(2, "subtask1Title", "subtask1Content", epic.getId(),
+                ZonedDateTime.of(LocalDateTime.parse("12:15 03.01.2023", DATE_TIME_FORMATTER), zone), 30, Status.IN_PROGRESS);
+        Subtask subtask2ForUpdate = new Subtask(3, "subtask2Title","subtask2Content", epic.getId(),
+                ZonedDateTime.of(LocalDateTime.parse("13:00 03.01.2023", DATE_TIME_FORMATTER), zone), 30, Status.IN_PROGRESS);
+
+        manager.updateSubtask(subtask1ForUpdate);
+        manager.updateSubtask(subtask2ForUpdate);
         Status result = epic.getStatus();
         assertEquals(Status.IN_PROGRESS, result);
     }

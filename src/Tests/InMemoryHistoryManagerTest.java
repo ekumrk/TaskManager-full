@@ -1,7 +1,7 @@
 package Tests;
 
-import manager.Managers;
-import manager.TaskManager;
+import managers.InMemoryTaskManager;
+import managers.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Task;
@@ -29,7 +29,7 @@ public class InMemoryHistoryManagerTest {
 
     @BeforeEach
     void init() {
-        manager = Managers.getDefault();
+        manager = new InMemoryTaskManager();
         task = new Task("taskTitle", "taskContent",
                 ZonedDateTime.of(LocalDateTime.parse("12:15 01.01.2023", DATE_TIME_FORMATTER), zone), 30);
         task2 = new Task("task2Title", "task2Content",

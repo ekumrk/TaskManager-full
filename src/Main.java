@@ -1,4 +1,5 @@
-import manager.FileBackedTaskManager;
+import managers.Managers;
+import managers.TaskManager;
 import tasks.*;
 
 import java.io.IOException;
@@ -10,11 +11,9 @@ import java.time.format.DateTimeFormatter;
 public class Main {
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
     public static final ZoneId zone = ZoneId.of("Europe/Simferopol");
-
+    static TaskManager f;
     public static void main(String[] args) throws IOException {
-
-
-        FileBackedTaskManager f = new FileBackedTaskManager("/dev/java-sprint7-hw/resources/history.csv");
+        f = Managers.getDefaultHttpManager();
         Task task;
         Epic epic;
         Subtask subtask;
@@ -48,6 +47,6 @@ public class Main {
         f.getTaskFromId(1);
         f.getTaskFromId(2);
         System.out.println(f.getHistory());
-        System.out.println(f.getPrioritySet());
+        System.out.println(TaskManager.getPrioritySet());
     }
 }
