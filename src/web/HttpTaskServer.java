@@ -1,4 +1,4 @@
-package HttpServer;
+package web;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
@@ -14,7 +14,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
-import managers.HttpTaskManager;
 import managers.Managers;
 import managers.TaskManager;
 import tasks.Epic;
@@ -26,8 +25,8 @@ public class HttpTaskServer {
     private static final int PORT = 8080;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static Gson gson;
-    private static TaskManager manager;
-    private static HttpServer httpServer;
+    private TaskManager manager;
+    private HttpServer httpServer;
 
     public HttpTaskServer() throws IOException {
         httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
@@ -38,52 +37,50 @@ public class HttpTaskServer {
                 .create();
     }
 
-    static class TaskHandler implements HttpHandler {
+    class TaskHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String[] pathParts = exchange.getRequestURI().getPath().split("/");
-
-            String endpoint = getEndpoint(pathParts, exchange.getRequestMethod());
+            String query = exchange.getRequestURI().getQuery();
+            Endpoint endpoint = getEndpoint(pathParts, exchange.getRequestMethod(), query);
 
             String id;
             InputStream inputStream;
             String body;
 
             switch (endpoint) {
-                case "Get_PriorititizedSet":
+                case GET_PRIORITITIZEDSET:
                     writeResponse(exchange, gson.toJson(TaskManager.getPrioritySet()), 200);
                     break;
-                case "Get_History":
+                case GET_HISTORY:
                     writeResponse(exchange, gson.toJson(manager.getHistory()), 200);
                     break;
-                case "Get_SubtasksByEpicId":
-                    id = pathParts[4].substring(4);
+                case GET_SUBTASK_FROM_EPICID:
+                    id = query.substring(3);
                     writeResponse(exchange, gson.toJson(manager.getSubtasksFromEpicId(Integer.parseInt(id))), 200);
                     break;
-                case "Get_Tasks":
+                case GET_TASKS:
                     writeResponse(exchange, gson.toJson(manager.getTaskList()), 200);
                     break;
-                case "Get_TaskById":
-                    id = pathParts[3].substring(4);
+                case GET_TASK_BY_ID:
+                    id = query.substring(3);
                     writeResponse(exchange, gson.toJson(manager.getTaskFromId(Integer.parseInt(id))), 200);
                     break;
-                case "Get_Subtasks":
+                case GET_SUBTASKS:
                     writeResponse(exchange, gson.toJson(manager.getSubtaskList()), 200);
                     break;
-                case "Get_SubtaskById":
-                    id = pathParts[3].substring(4);
+                case GET_SUBTASK_BY_ID:
+                    id = query.substring(3);
                     writeResponse(exchange, gson.toJson(manager.getSubtaskFromId(Integer.parseInt(id))), 200);
                     break;
-                case "Get_Epics":
+                case GET_EPICS:
                     writeResponse(exchange, gson.toJson(manager.getEpicList()), 200);
                     break;
-                case "Get_EpicById":
-                    //TODO
-                    id = exchange.getRequestURI().getQuery();
-                    id = pathParts[3].substring(4);
+                case GET_EPIC_BY_ID:
+                    id = query.substring(3);
                     writeResponse(exchange, gson.toJson(manager.getEpicFromId(Integer.parseInt(id))), 200);
                     break;
-                case "Post_NewOrUpdateTask":
+                case POST_NEW_OR_UPDATE_TASK:
                     inputStream = exchange.getRequestBody();
                     body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
                     try {
@@ -102,7 +99,7 @@ public class HttpTaskServer {
                         }
                     }
                     break;
-                case "Post_NewOpUpdateSubtask":
+                case POST_NEW_OR_UPDATE_SUBTASK:
                     inputStream = exchange.getRequestBody();
                     body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
                     try {
@@ -121,7 +118,7 @@ public class HttpTaskServer {
                         }
                     }
                     break;
-                case "Post_NewEpic":
+                case POST_NEW_EPIC:
                     inputStream = exchange.getRequestBody();
                     body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
                     try {
@@ -135,30 +132,30 @@ public class HttpTaskServer {
                         }
                     }
                     break;
-                case "Delete_AllTasks":
+                case DELETE_ALL_TASKS:
                     manager.deleteAllTasks();
                     writeResponse(exchange, "Все задачи удалены.", 200);
                     break;
-                case "Delete_TaskById":
-                    id = pathParts[3].substring(4);
+                case DELETE_TASK_BY_ID:
+                    id = query.substring(3);
                     manager.deleteTaskFromId(Integer.parseInt(id));
                     writeResponse(exchange, "Задача с id + " + id + "удалена.", 200);
                     break;
-                case "Delete_AllSubtasks":
+                case DELETE_ALL_SUBTASKS:
                     manager.deleteAllSubtasks();
                     writeResponse(exchange, "Все подзадачи удалены.", 200);
                     break;
-                case "Delete_SubtaskById":
-                    id = pathParts[3].substring(4);
+                case DELETE_SUBTASK_BY_ID:
+                    id = query.substring(3);
                     manager.deleteSubtaskFromId(Integer.parseInt(id));
                     writeResponse(exchange, "Подзадача с id + " + id + "удалена.", 200);
                     break;
-                case "Delete_All_Epics":
+                case DELETE_ALL_EPICS:
                     manager.deleteAllEpics();
                     writeResponse(exchange, "Все эпики удалены.", 200);
                     break;
-                case "Delete_Epic_ById":
-                    id = pathParts[3].substring(4);
+                case DELETE_EPIC_BY_ID:
+                    id = query.substring(3);
                     manager.deleteEpicFromId(Integer.parseInt(id));
                     writeResponse(exchange, "Подзадача с id + " + id + "удалена.", 200);
                     break;
@@ -168,70 +165,70 @@ public class HttpTaskServer {
         }
     }
 
-    private static String getEndpoint(String[] pathParts, String requestMethod) {
+    private static Endpoint getEndpoint(String[] pathParts, String requestMethod, String query) {
 
         switch(requestMethod) {
             case "GET":
                 if (pathParts[2].isBlank()) {
-                    return "Get_PriorititizedSet";
+                    return Endpoint.GET_PRIORITITIZEDSET;
                 } else if (pathParts[2].equals("history")) {
-                    return "Get_History";
+                    return Endpoint.GET_HISTORY;
                 } else if (pathParts[4].startsWith("?id=")) {
-                    return "Get_SubtasksByEpicId";
+                    return Endpoint.GET_SUBTASK_FROM_EPICID;
                 } else {
                     if (pathParts[2].equals("task")) {
                        if (pathParts[3].isBlank()) {
-                           return "Get_Tasks";
-                       } else if (pathParts[3].startsWith("?id=")) {
-                           return "Get_TaskById";
+                           return Endpoint.GET_TASKS;
+                       } else if (query.startsWith("id=")) {
+                           return Endpoint.GET_TASK_BY_ID;
                        }
                    } else if (pathParts[2].equals("subtask")) {
                        if (pathParts[3].isBlank()) {
-                           return "Get_Subtasks";
-                       } else if (pathParts[3].startsWith("?id=")) {
-                           return "Get_SubtaskById";
+                           return Endpoint.GET_SUBTASKS;
+                       } else if (query.startsWith("id=")) {
+                           return Endpoint.GET_SUBTASK_BY_ID;
                        }
                    } else if (pathParts[2].equals("epic")) {
                         if (pathParts[3].isBlank()) {
-                            return "Get_Epics";
-                        } else if (pathParts[3].startsWith("?id=")) {
-                            return "Get_EpicById";
+                            return Endpoint.GET_EPICS;
+                        } else if (query.startsWith("id=")) {
+                            return Endpoint.GET_EPIC_BY_ID;
                         }
                    }
                 }
                 break;
             case "POST":
                 if (pathParts[2].equals("task")) {
-                    return "Post_NewOrUpdateTask";
+                    return Endpoint.POST_NEW_OR_UPDATE_TASK;
                 } else if (pathParts[2].equals("subtask")) {
-                    return "Post_NewOpUpdateSubtask";
+                    return Endpoint.POST_NEW_OR_UPDATE_SUBTASK;
                 } else if (pathParts[2].equals("epic")) {
-                    return "Post_NewEpic";
+                    return Endpoint.POST_NEW_EPIC;
                 }
                 break;
             case "DELETE":
                 if (pathParts[2].equals("task")) {
                     if (pathParts[3].isBlank()) {
-                        return "Delete_AllTasks";
+                        return Endpoint.DELETE_ALL_TASKS;
                     } else {
-                        return "Delete_TaskById";
+                        return Endpoint.DELETE_TASK_BY_ID;
                     }
                 } else if (pathParts[2].equals("subtask")) {
                     if (pathParts[3].isBlank()) {
-                        return "Delete_AllSubtasks";
+                        return Endpoint.DELETE_ALL_SUBTASKS;
                     } else {
-                        return "Delete_SubtaskById";
+                        return Endpoint.DELETE_SUBTASK_BY_ID;
                     }
                 } else if (pathParts[2].equals("epic")) {
                     if (pathParts[3].isBlank()) {
-                        return "Delete_All_Epics";
+                        return Endpoint.DELETE_ALL_EPICS;
                     } else {
-                        return "Delete_Epic_ById";
+                        return Endpoint.DELETE_EPIC_BY_ID;
                     }
                 }
                 break;
         }
-        return "UNKNOWN";
+        return Endpoint.UNKNOWN;
     }
     private static void writeResponse(HttpExchange exchange, String responseString, int responseCode) throws IOException {
         if(responseString.isBlank()) {
@@ -246,6 +243,11 @@ public class HttpTaskServer {
         }
         exchange.close();
     }
+
+    enum Endpoint {GET_PRIORITITIZEDSET, GET_HISTORY, DELETE_EPIC_BY_ID, GET_SUBTASK_FROM_EPICID, GET_TASKS,
+        GET_TASK_BY_ID, GET_SUBTASKS, GET_SUBTASK_BY_ID, GET_EPICS, GET_EPIC_BY_ID, POST_NEW_OR_UPDATE_TASK,
+        POST_NEW_OR_UPDATE_SUBTASK, POST_NEW_EPIC, DELETE_ALL_TASKS, DELETE_TASK_BY_ID, DELETE_ALL_SUBTASKS,
+        DELETE_SUBTASK_BY_ID, DELETE_ALL_EPICS, UNKNOWN}
 
     public void stop() {
         System.out.println("Остановлен сервер на порту " + PORT);

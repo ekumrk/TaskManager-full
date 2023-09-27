@@ -1,3 +1,4 @@
+import managers.HttpTaskManager;
 import managers.Managers;
 import managers.TaskManager;
 import tasks.*;
@@ -11,9 +12,8 @@ import java.time.format.DateTimeFormatter;
 public class Main {
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
     public static final ZoneId zone = ZoneId.of("Europe/Simferopol");
-    static TaskManager f;
     public static void main(String[] args) throws IOException {
-        f = Managers.getDefaultHttpManager();
+        TaskManager f = new HttpTaskManager("http://localhost:8078");
         Task task;
         Epic epic;
         Subtask subtask;

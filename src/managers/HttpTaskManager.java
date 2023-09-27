@@ -1,8 +1,8 @@
 package managers;
 
-import HttpServer.KVTaskClient;
-import HttpServer.TimeAdapter;
-import ProgrammExceptions.LoadException;
+import web.KVTaskClient;
+import web.TimeAdapter;
+import exceptions.LoadException;
 import com.google.gson.*;
 import com.google.gson.GsonBuilder;
 import tasks.Epic;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 public class HttpTaskManager extends FileBackedTaskManager {
-    private static KVTaskClient client;
+    private KVTaskClient client;
     private static final Gson gson = new GsonBuilder().serializeNulls()
             .registerTypeAdapter(LocalDateTime.class, new TimeAdapter())
             .create();
@@ -30,7 +30,7 @@ public class HttpTaskManager extends FileBackedTaskManager {
         client.saveToServer(KEYS[3], gson.toJson(getHistory()));
     }
 
-    public static HttpTaskManager loadFromServer(String URL) throws IOException {
+    public HttpTaskManager loadFromServer(String URL) throws IOException {
         HttpTaskManager manager = new HttpTaskManager(URL);
 
         for (String key : KEYS) {
@@ -57,21 +57,21 @@ public class HttpTaskManager extends FileBackedTaskManager {
                 switch (key) {
                     case "TASKS":
                         Task task = gson.fromJson(e, Task.class);
-                        super.createNewTask(task);
+                        manager.createNewTask(task);
                         break;
                     case "EPICS":
                         Epic epic = gson.fromJson(e, Epic.class);
-                        super.createNewEpic(epic);
+                        manager.createNewEpic(epic);
                         break;
                     case "SUBTASKS":
                         Subtask subtask = gson.fromJson(e, Subtask.class);
-                        super.createNewSubtask(subtask);
+                        manager.createNewSubtask(subtask);
                         break;
                     case "HISTORY":
                         int id = e.getAsJsonObject().get("id").getAsInt();
-                        Task task1 = super.allTasks.get(id);
+                        Task task1 = manager.allTasks.get(id);
                         if (task1 != null) {
-                            super.historyManager.addToHistoryTask(task1);
+                            manager.historyManager.addToHistoryTask(task1);
                         }
                     default:
                         throw new LoadException("Ошибка, неправильный тип задач при загрузке");

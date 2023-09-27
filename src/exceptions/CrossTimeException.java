@@ -1,4 +1,4 @@
-package ProgrammExceptions;
+package exceptions;
 
 public class CrossTimeException extends UnsupportedOperationException {
     public CrossTimeException() {

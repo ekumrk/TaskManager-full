@@ -10,7 +10,4 @@ public class Managers {
     public static TaskManager getDefault(String direction) throws IOException {
         return new FileBackedTaskManager(direction);
     }
-    public static HttpTaskManager getDefaultHttpManager() throws IOException {
-        return HttpTaskManager.loadFromServer("http://localhost:8078");
-    }
 }

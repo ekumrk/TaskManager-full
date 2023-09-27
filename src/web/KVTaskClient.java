@@ -1,8 +1,8 @@
-package HttpServer;
+package web;
 
-import ProgrammExceptions.LoadException;
-import ProgrammExceptions.RegistrationAPIException;
-import ProgrammExceptions.SaveException;
+import exceptions.LoadException;
+import exceptions.RegistrationAPIException;
+import exceptions.SaveException;
 
 import java.io.IOException;
 import java.net.URI;

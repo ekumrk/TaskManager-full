@@ -1,4 +1,4 @@
-package Tests;
+package tests;
 
 import managers.FileBackedTaskManager;
 import org.junit.jupiter.api.AfterEach;
