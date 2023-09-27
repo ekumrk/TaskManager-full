@@ -14,12 +14,12 @@ public class KVTaskClient {
 
     private final HttpClient httpclient;
     private final String URL;
-    private final String API_TOKEN;
+    private final String token;
 
     public KVTaskClient(String url) {
         httpclient = HttpClient.newHttpClient();
         this.URL = url;
-        API_TOKEN = registerApiToken(URL);
+        this.token = registerApiToken(URL);
     }
 
     private String registerApiToken(String URL) {
@@ -41,7 +41,7 @@ public class KVTaskClient {
 
     public void saveToServer(String key, String json) {
         try {
-            URI url = URI.create(String.format("%s/save/%s/?API_TOKEN=%s", URL, key, API_TOKEN));
+            URI url = URI.create(String.format("%s/save/%s/?API_TOKEN=%s", URL, key, token));
             HttpRequest request = HttpRequest.newBuilder()
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .uri(url)
@@ -55,7 +55,7 @@ public class KVTaskClient {
 
     public String load(String key) {
         try {
-            URI url = URI.create(String.format("%s/load/%s/?API_TOKEN=%s", URL, key, API_TOKEN));
+            URI url = URI.create(String.format("%s/load/%s/?API_TOKEN=%s", URL, key, token));
             HttpRequest request = HttpRequest.newBuilder()
                     .GET()
                     .uri(url)
